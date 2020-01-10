@@ -1,0 +1,169 @@
+create database db_peradilan;
+use db_peradilan;
+
+//JENIS KELAMIN
+create table JenisKelamin(id int primary key auto_increment, jenisKelamin varchar(30));
+insert into JenisKelamin(id, jenisKelamin) values (1, "Laki-laki"), (2, "Perempuan");
+
+//AGAMA
+create table Agama(id int primary key auto_increment, agama varchar(30));
+insert into Agama(id, agama) values (1, "Islam"), (2, "Kristen"), (3, "Katolik"), (4, "Budha"), (5, "Hindu"), (6, "Konghucu");
+
+//PENDIDIKAN
+create table Pendidikan(id int primary key auto_increment, tingkatPendidikan varchar(30));
+insert into Pendidikan(id, tingkatPendidikan) values (1, "SD"), (2, "SMP"), (3, "SMA/SMK"), (4, "D3"), (5, "S1"), (6, "S2"), (7, "S3");
+
+//KEBANGSAAN
+create table Kebangsaan(id int primary key auto_increment, jenisKebangsaan varchar(30));
+insert into Kebangsaan(id, jenisKebangsaan) values (1, "WNI"), (2, "WNA");
+
+//STATUS KETERLIBATAN
+create table StatusKeterlibatan(id int primary key auto_increment, statusKeterlibatan varchar(30));
+insert into StatusKeterlibatan(id, statusKeterlibatan) values (1, "Penggugat"), (2, "Tergugat");
+
+//KATEGORI
+create table KategoriOrang(id int primary key auto_increment, kategori varchar(30));
+insert into KategoriOrang(id, kategori) values (1, "Perorangan"), (2, "Pemerintah");
+
+//PEKERJAAN
+create table Pekerjaan(id int primary key auto_increment, jenisPekerjaan varchar(30));
+insert into Pekerjaan(id, jenisPekerjaan) values (1, "PNS"), (2, "Swasta"), (3, "Lain-lain");
+
+//PERKARA
+create table Perkara(id int primary key auto_increment, jenisPerkara varchar(30));
+insert into Perkara(id, jenisPerkara) values (1, "Pidana"), (2, "Perdata");
+
+//JABATAN MAJELIS
+create table JabatanMajelis(id int primary key auto_increment, jabatan varchar(30));
+insert into JabatanMajelis(jabatan) values("Hakim Ketua"), ("Hakim Anggota"), ("Panitera");
+
+//MAJELIS
+create table Majelis(id int primary key auto_increment, nip varchar(30), nama varchar(255), idJabatan int, foreign key(idJabatan) references JabatanMajelis(id));
+
+create table Orang(id int primary key auto_increment, nik varchar(30), nama varchar(255), alamat varchar(255), 
+tanggalLahir date, pengacara varchar(255), idJenisKelamin int, 
+idStatus int, idKebangsaan int, idAgama int, idPendidikan int, idPekerjaan int, idKategori int,
+foreign key(idJenisKelamin) references JenisKelamin(id), 
+foreign key(idKebangsaan) references Kebangsaan(id), 
+foreign key(idPendidikan) references Pendidikan(id),
+foreign key(idAgama) references Agama(id),
+foreign key(idPekerjaan) references Pekerjaan(id),
+foreign key(idStatus) references StatusKeterlibatan(id),
+foreign key(idKategori) references Kategori(id)
+);
+
+insert into Orang(nik, nama, alamat, tanggalLahir, pengacara, idJenisKelamin, idStatus, idKebangsaan, idAgama, idPendidikan, idPekerjaan, idKategori)
+values ("12345", "Rifqi", "Jl. Salak", "2000-05-11", "Suprano S.H.", 1, 1, 1, 1, 5, 1, 1);
+
+select Orang.id, nik, nama, alamat, tanggalLahir, pengacara, jenisKelamin, kategori, statusKeterlibatan, jenisKebangsaan, agama, tingkatPendidikan, jenisPekerjaan from Orang
+  join JenisKelamin on Orang.idJenisKelamin = JenisKelamin.id
+  join KategoriOrang on Orang.idKategori = KategoriOrang.id
+  join StatusKeterlibatan on Orang.idStatus = StatusKeterlibatan.id
+  join Kebangsaan on Orang.idKebangsaan = Kebangsaan.id
+  join Agama on Orang.idAgama = Agama.id
+  join Pendidikan on Orang.idPendidikan = Pendidikan.id
+  join Pekerjaan on Orang.idPekerjaan = Pekerjaan.id;
+
+// Kategori gugatan
+create table KategoriGugatan(id int primary key auto_increment, kategoriGugatan varchar(30));
+insert into KategoriGugatan(kategoriGugatan) values("Kejahatan"), ("Pelanggaran"), ("Perkawinan"), ("Waris"), ("Kekeluargaan"), ("Perikatan"), ("Kekayaan");
+
+// Perkara
+create table Perkara(id int primary key auto_increment, jenisPerkara varchar(30));
+insert into Perkara(jenisPerkara) values("Pidana"), ("Perdata");
+
+// Hasil Sidang
+create table HasilSidang(id int primary key auto_increment, hasilSidang varchar(255));
+insert into HasilSidang(hasilSidang) values("Dimenangkan oleh penggugat"), ("Dimenangkan oleh tergugat"), ("Keputusan hakim");
+
+// Gugatan
+create table Gugatan(
+	id int primary key auto_increment,
+    noGugatan varchar(30),
+    idPerkara int,
+    idKategori int,
+    idPenggugat int,
+    idTergugat int,
+    tanggalDaftarGugatan date,
+    idHakimKetua int,
+    idHakimAnggota1 int,
+    idHakimAnggota2 int,
+    idPanitera int,
+    tanggalSidang date,
+    tanggalPutusan date,
+    idHasilSidang int,
+    foreign key(idPerkara) references Perkara(id),
+    foreign key(idKategori) references KategoriGugatan(id),
+    foreign key(idPenggugat) references Orang(id),
+    foreign key(idTergugat) references Orang(id),
+    foreign key(idHakimKetua) references Majelis(id),
+    foreign key(idHakimAnggota1) references Majelis(id),
+    foreign key(idHakimAnggota2) references Majelis(id),
+    foreign key(idPanitera) references Majelis(id),
+    foreign key(idHasilSidang) references HasilSidang(id)
+);
+
+select Gugatan.id, noGugatan, Perkara.jenisPerkara, KategoriGugatan.kategoriGugatan, HasilSidang.hasilSidang
+from Gugatan
+  join Perkara on Gugatan.idPerkara = Perkara.id
+  join KategoriGugatan on Gugatan.idKategori = KategoriGugatan.id
+  join HasilSidang on Gugatan.idHasilSidang = HasilSidang.id;
+
+select Gugatan.id, noGugatan, Orang.nama
+from Gugatan
+  join Orang on Gugatan.idPenggugat = Orang.id;
+
+select Gugatan.id, noGugatan, Orang.nama
+from Gugatan
+  join Orang on Gugatan.idTergugat = Orang.id;
+
+select Gugatan.id, noGugatan, Majelis.nama
+from Gugatan
+  join Majelis on Gugatan.idHakimKetua = Majelis.id;
+
+select Gugatan.id, noGugatan, Majelis.nama
+from Gugatan
+  join Majelis on Gugatan.idHakimAnggota1 = Majelis.id;
+
+select Gugatan.id, noGugatan, Majelis.nama
+from Gugatan
+  join Majelis on Gugatan.idHakimAnggota2 = Majelis.id;
+
+select Gugatan.id, noGugatan, Majelis.nama
+from Gugatan
+  join Majelis on Gugatan.idPanitera = Majelis.id;
+
+
+//KASASI
+create table Kasasi(
+	id int primary key auto_increment,
+    idGugatan int,
+    tanggalKasasi date,
+    tanggalPutusanKasasi date,
+    idHasilPutusanKasasi int,
+    foreign key(idGugatan) references Gugatan(id),
+    foreign key(idHasilPutusanKasasi) references HasilSidang(id)
+);
+
+
+//BANDING
+create table Banding(
+	id int primary key auto_increment,
+    idGugatan int,
+    tanggalBanding date,
+    tanggalPutusanBanding date,
+    idHasilPutusanBanding int,
+    foreign key(idGugatan) references Gugatan(id),
+    foreign key(idHasilPutusanBanding) references HasilSidang(id)
+);
+
+//PENINJAUAN KEMBALI
+create table PeninjauanKembali(
+	id int primary key auto_increment,
+    idGugatan int,
+    tanggalPeninjauanKembali date,
+    tanggalPutusanPeninjauanKembali date,
+    idHasilPutusanPeninjauanKembali int,
+    foreign key(idGugatan) references Gugatan(id),
+    foreign key(idHasilPutusanPeninjauanKembali) references HasilSidang(id)
+);
